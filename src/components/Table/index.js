@@ -7,6 +7,7 @@ import InputGroup from "react-bootstrap/InputGroup";
 import Form from "react-bootstrap/Form";
 import { useEffect, useState } from "react";
 import "./style.css";
+import { ethers } from "ethers";
 
 const SenderTable = (props) => {
   let indexOfLastItem;
@@ -25,13 +26,52 @@ const SenderTable = (props) => {
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
+
+  const isValidAddress=(address)=>{
+    if (!/^(0x)?[0-9a-fA-F]{40}$/.test(address)) {
+      return false;
+    }
+    const isvalid = ethers.isAddress(address); 
+    return isvalid;
+  }
+
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const csvString = e.target.result;
+      console.log(csvString)
+      const addressArr = csvString.replace(/\s/g, "").split(",");
+      let addressList = addressArr.filter((item) => item !== "");
+      //removing duplicate addresses
+      let addressSet = new Set(addressList)
+      addressList=[...addressSet]
+      console.log(addressList)
+      let newWallets=[]
+      for(let i=0;i<addressList.length;i++){
+        if(!isValidAddress(addressList[0])){
+          alert('Invalid address format in csv file provided')
+          break
+        }else{
+          newWallets.push(addressList[i])
+        }
+      }
+      setWallets(newWallets)
+      console.log(newWallets)
+
+    };
+
+    reader.readAsText(file);
+  };
   const uploadWallet = async (e) => {
     // setWallets(dummy);
-    const response = await fetch(process.env.PUBLIC_URL + "/wallets.csv");
-    const data = await response.text();
-    const dataArray = data.replace(/\s/g, "").split(",");
-    const resultArr = dataArray.filter((item) => item !== "");
-    setWallets(resultArr);
+    // const response = await fetch(process.env.PUBLIC_URL + "/wallets.csv");
+    // const data = await response.text();
+    // const dataArray = data.replace(/\s/g, "").split(",");
+    // const resultArr = dataArray.filter((item) => item !== "");
+    // setWallets(resultArr);
   };
 
   return (
@@ -75,10 +115,19 @@ const SenderTable = (props) => {
       </Pagination> */}
 
       <div className="tableButton">
+        <input 
+          id='csv_inp' 
+          type="file" 
+          accept='.csv' 
+          style={{display:'none'}}
+          onChange={(e)=>handleFileChange(e)}
+        />
         <Button
           className="uploadButton"
           disabled={!isConnected}
-          onClick={uploadWallet}
+          onClick={()=>{
+            document.getElementById('csv_inp').click()
+          }}
         >
           Upload file
         </Button>

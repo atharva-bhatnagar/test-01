@@ -8,13 +8,13 @@ import "./Transfer.css";
 // import { API_URL } from "../config";
 
 const Transfer = (props) => {
-  const { quantity, setQuantity, totalQuantity, balanceAmount } = props;
+  const { text,quantity, setQuantity, totalQuantity, balanceAmount } = props;
   return (
     <div className="eth_transfer">
       <div className="_ethamount">
         <InputGroup size="lg" className="eth_amount">
           <InputGroup.Text id="inputGroup-sizing-lg">
-            Quantity per wallet
+            {text}
           </InputGroup.Text>
           <Form.Control
             aria-label="Large"
